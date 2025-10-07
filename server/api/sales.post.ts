@@ -1,21 +1,6 @@
-<script lang="ts" setup>
-import { ref } from 'vue'
-import { Line } from 'vue-chartjs'
-import {
-  Chart as ChartJS,
-  Title,
-  Tooltip,
-  Legend,
-  LineElement,
-  PointElement,
-  CategoryScale,
-  LinearScale
-} from 'chart.js'
-import { getSalesByDate } from '~/api/apiChart'
 
-type Category = "Электроника" | "Одежда" | "Книги"
 
-const salesDataByDate = [
+const salesData = [
   { date: "2024-10-01", categories: { "Электроника": 1200, "Одежда": 800, "Книги": 500 } },
   { date: "2024-10-02", categories: { "Электроника": 1500, "Книги": 600 } },
   { date: "2024-10-03", categories: { "Электроника": 2000, "Одежда": 900 } },
@@ -47,115 +32,19 @@ const salesDataByDate = [
   { date: "2024-10-29", categories: { "Электроника": 1400, "Одежда": 700 } },
   { date: "2024-10-30", categories: { "Электроника": 1500, "Одежда": 500, "Книги": 300 } },
   { date: "2024-10-31", categories: { "Электроника": 1800, "Книги": 550 } }
-]
+];
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale)
+export default defineEventHandler(async (event) => {
+  const body = await readBody<{ startDate: string; endDate: string }>(event)
 
-const categories: Category[] = ["Электроника", "Одежда", "Книги"]
+  const { startDate, endDate } = body
 
-const colors = ['#4f46e5', '#6366f1', '#8b5cf6', '#a78bfa']
-
-const datasets = categories.map((cat: Category, index) => ({
-  label: cat,
-  data: salesDataByDate.map(d => d.categories[cat] || 0),
-  borderColor: colors[index % colors.length],
-  backgroundColor: colors[index % colors.length],
-  tension: 0.3,
-  fill: false
-}))
-
-
-const chartData = ref({
-  labels: salesDataByDate.map(d => d.date),
-  datasets
-})
-
-const chartOptions = ref({
-  responsive: true,       
-  maintainAspectRatio: false,  
-  plugins: {
-    legend: { display: false },
-    title: { display: false, },
-    tooltip: { mode: 'index', intersect: false }
-  },
-  interaction: { mode: 'nearest' as const, axis: 'x' as const, intersect: false },
-  scales: { y: { beginAtZero: true } }
-})
-
-
-
-
-setTimeout(() => {
-  getSales('2024-10-01', '2024-10-09')
-}, 2000);
-
-const getSales = async (startDate: string, endDate: string) => {
-  try { 
-    const response = await getSalesByDate(startDate, endDate);
-    console.log(response)
-  } catch (error) {
-    console.log(error)
-  };
-};
-</script>
-
-<template>
-  <div class="chart-container">
-    <div class="chart-header">
-      <h2>Динамика продаж по категориям</h2>
-      <div class="chart-legend">
-        <span v-for="(cat, index) in categories" :key="cat" class="legend-item" :style="{ color: colors[index % colors.length] }">
-          ● {{ cat }}
-        </span>
-      </div>
-    </div>
-
-    <div class="chart-scroll-wrapper">
-      <div class="chart-inner">
-        <Line :data="chartData" :options="chartOptions" />
-      </div>
-    </div>
-  </div>
-</template>
-
-<style scoped>
-.chart-scroll-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  padding-bottom: 10px;
-}
-
-.chart-scroll-wrapper::-webkit-scrollbar {
-  height: 12px;
-  width: 6px !important;
-  cursor: default !important;
-}
-
-.chart-scroll-wrapper::-webkit-scrollbar-track {
-  background: rgb(199, 199, 199);
-  overflow: hidden;
-  cursor: default !important;
-}
-
-.chart-scroll-wrapper::-webkit-scrollbar-thumb {
-  background-color: rgb(129, 129, 129);
-  cursor: default !important;
-}
-
-.chart-inner {
-  min-width: calc(100px * 31);
-  height: 400px;
-}
-
-@media (max-width: 1024px) {
-  .chart-wrapper {
-    height: 300px; 
+  if (!startDate || !endDate) {
+    return { error: 'Не переданы даты' }
   }
-}
 
-@media (max-width: 640px) {
-  .chart-wrapper {
-    height: 250px; 
-  }
-}
-</style>
+  const filteredData = salesData.filter(item => {
+    return item.date >= startDate && item.date <= endDate
+  })
+  return { data: filteredData }
+});
