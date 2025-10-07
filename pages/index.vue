@@ -111,10 +111,6 @@ getSales(nowDate, monthAheadDate);
       />
     </div>
 
-    <p>
-  {{ formatDate(getStartEnd()[0]) }} — {{ formatDate(getStartEnd()[1]) }}
-</p>
-
     <div class="chart__period">
       <div class="title-period">
         <p>Выбор периода</p>
@@ -149,8 +145,14 @@ getSales(nowDate, monthAheadDate);
 <style lang="scss" scoped>
 @use "@/style/variables/color.scss" as color;
 
+.chart {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
 .chart__scroll-wrap {
-  width: 100%;
+  flex: 1;
   overflow-x: auto;
   padding-bottom: 10px;
 }
@@ -174,7 +176,19 @@ getSales(nowDate, monthAheadDate);
 
 .chart-inner {
   min-width: calc(100px * 31);
-  height: 70vh;
+  height: 100%;
+}
+
+.chart__header {
+  text-align: center;
+  padding: 20px;
+  border-radius: 8px;
+  background: color.$main_white;
+  margin-bottom: 24px;
+}
+
+.legend-chart {
+  margin-top: 12px;
 }
 
 .chart__period {
@@ -182,11 +196,16 @@ getSales(nowDate, monthAheadDate);
   align-items: center;
   gap: 10px;
   margin-bottom: 24px;
+  margin-left: 24px;
 }
 
 .buttons-period {
   display: flex;
   gap: 8px;
+}
+
+.calendar-wrap {
+  margin-left: 24px;
 }
 
 @media (max-width: 1024px) {
