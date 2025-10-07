@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import DefaultButton from '~/components/ui/DefaultButton.vue'
 import { ref } from 'vue'
 import { Line } from 'vue-chartjs'
 import {
@@ -49,6 +50,16 @@ const salesDataByDate = [
   { date: "2024-10-31", categories: { "Электроника": 1800, "Книги": 550 } }
 ]
 
+
+
+
+const nowDate: string = new Date().toISOString().split('T')[0]!;
+const weekAheadDate: string = new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0]!;
+const monthAheadDate: string = new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0]!;
+
+
+
+//chart
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale)
 
 const categories: Category[] = ["Электроника", "Одежда", "Книги"]
@@ -63,7 +74,6 @@ const datasets = categories.map((cat: Category, index) => ({
   tension: 0.3,
   fill: false
 }))
-
 
 const chartData = ref({
   labels: salesDataByDate.map(d => d.date),
@@ -81,7 +91,7 @@ const chartOptions = ref({
   interaction: { mode: 'nearest' as const, axis: 'x' as const, intersect: false },
   scales: { y: { beginAtZero: true } }
 })
-
+//--------
 
 
 
@@ -100,17 +110,40 @@ const getSales = async (startDate: string, endDate: string) => {
 </script>
 
 <template>
-  <div class="chart-container">
-    <div class="chart-header">
+  <div class="chart">
+    <div class="chart__header">
       <h2>Динамика продаж по категориям</h2>
-      <div class="chart-legend">
-        <span v-for="(cat, index) in categories" :key="cat" class="legend-item" :style="{ color: colors[index % colors.length] }">
+      <div class="legend-chart">
+        <span v-for="(cat, index) in categories" :key="cat" class="legend-chart__item" :style="{ color: colors[index % colors.length] }">
           ● {{ cat }}
         </span>
       </div>
     </div>
 
-    <div class="chart-scroll-wrapper">
+    <div class="chart__period">
+      <div class="title-period">
+        <p>Выбор периода</p>
+      </div>
+      <div class="buttons-period">
+        <DefaultButton
+          @click="getSales(nowDate, nowDate)"
+        >
+          Сегодня
+        </DefaultButton>
+        <DefaultButton
+          @click="getSales(nowDate, weekAheadDate)"
+        >
+          Неделя
+        </DefaultButton>
+        <DefaultButton
+          @click="getSales(nowDate, monthAheadDate)"
+        >
+          Месяц
+        </DefaultButton>
+      </div>
+    </div>
+
+    <div class="chart__scroll-wrap">
       <div class="chart-inner">
         <Line :data="chartData" :options="chartOptions" />
       </div>
@@ -119,25 +152,25 @@ const getSales = async (startDate: string, endDate: string) => {
 </template>
 
 <style scoped>
-.chart-scroll-wrapper {
+.chart__scroll-wrap {
   width: 100%;
   overflow-x: auto;
   padding-bottom: 10px;
 }
 
-.chart-scroll-wrapper::-webkit-scrollbar {
+.chart__scroll-wrap::-webkit-scrollbar {
   height: 12px;
   width: 6px !important;
   cursor: default !important;
 }
 
-.chart-scroll-wrapper::-webkit-scrollbar-track {
+.chart__scroll-wrap::-webkit-scrollbar-track {
   background: rgb(199, 199, 199);
   overflow: hidden;
   cursor: default !important;
 }
 
-.chart-scroll-wrapper::-webkit-scrollbar-thumb {
+.chart__scroll-wrap::-webkit-scrollbar-thumb {
   background-color: rgb(129, 129, 129);
   cursor: default !important;
 }
@@ -145,6 +178,19 @@ const getSales = async (startDate: string, endDate: string) => {
 .chart-inner {
   min-width: calc(100px * 31);
   height: 400px;
+}
+
+.chart__period {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.buttons-period {
+  display: flex;
+  gap: 8px;
+
 }
 
 @media (max-width: 1024px) {
