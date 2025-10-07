@@ -23,16 +23,35 @@ const nowDate: string = new Date().toISOString().split('T')[0]!;
 const weekAheadDate: string = new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0]!;
 const monthAheadDate: string = new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0]!;
 
+//calendar
+const range = ref<any>([new Date(), new Date()])
+const formatDate = (date: Date | string | null) => {
+  if (!date) return ''
+  if (typeof date === 'string') return date.split('T')[0]
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getStartEnd = () => {
+  if (Array.isArray(range.value)) return range.value;
+  if (range.value && range.value.start && range.value.end) return [range.value.start, range.value.end];
+  return [null, null];
+};
+
+watch(range, () => {
+  const startStr = formatDate(getStartEnd()[0]);
+  const endStr = formatDate(getStartEnd()[1]);
+  if(startStr && endStr) getSales(startStr, endStr);
+});
+
 //chart
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale)
-
 const categories: Category[] = ["Электроника", "Одежда", "Книги"]
-
 const colors = ['#4f46e5', '#6366f1', '#8b5cf6', '#a78bfa']
-
 const chartData = computed(() => {
   const labels = salesDataArr.value?.map(d => d.date) || [];
-
   const datasets = categories.map((cat: Category, index) => ({
     label: cat,
     data: salesDataArr.value?.map(d => d.categories[cat] || 0) || [],
@@ -41,7 +60,6 @@ const chartData = computed(() => {
     tension: 0.3,
     fill: false
   }));
-
   return { labels, datasets };
 });
 
@@ -57,8 +75,6 @@ const chartOptions = ref({
   scales: { y: { beginAtZero: true } }
 })
 //-------
-
-console.log(1)
 
 const getSales = async (startDate: string, endDate: string) => {
   try { 
@@ -85,6 +101,19 @@ getSales(nowDate, monthAheadDate);
         </span>
       </div>
     </div>
+
+    <div class="calendar-wrap" style="margin-bottom:16px;">
+      <v-date-picker
+        v-model="range"
+        is-range
+        :popover="{ placement: 'bottom' }"
+        :masks="{ input: 'YYYY-MM-DD' }"
+      />
+    </div>
+
+    <p>
+  {{ formatDate(getStartEnd()[0]) }} — {{ formatDate(getStartEnd()[1]) }}
+</p>
 
     <div class="chart__period">
       <div class="title-period">
@@ -145,7 +174,7 @@ getSales(nowDate, monthAheadDate);
 
 .chart-inner {
   min-width: calc(100px * 31);
-  height: 400px;
+  height: 70vh;
 }
 
 .chart__period {
