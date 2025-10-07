@@ -151,7 +151,9 @@ const getSales = async (startDate: string, endDate: string) => {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
+@use "@/style/variables/color.scss" as color;
+
 .chart__scroll-wrap {
   width: 100%;
   overflow-x: auto;
@@ -165,13 +167,13 @@ const getSales = async (startDate: string, endDate: string) => {
 }
 
 .chart__scroll-wrap::-webkit-scrollbar-track {
-  background: rgb(199, 199, 199);
+  background: color.$steel_gray_4; 
   overflow: hidden;
   cursor: default !important;
 }
 
 .chart__scroll-wrap::-webkit-scrollbar-thumb {
-  background-color: rgb(129, 129, 129);
+  background-color: color.$main_purple;
   cursor: default !important;
 }
 
@@ -190,7 +192,6 @@ const getSales = async (startDate: string, endDate: string) => {
 .buttons-period {
   display: flex;
   gap: 8px;
-
 }
 
 @media (max-width: 1024px) {
